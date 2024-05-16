@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup
-        run: sudo apt-get update && sudo apt-get install gcc-riscv64-unknown-elf
+        run: sudo apt-get update && sudo apt-get install gcc-riscv64-linux-gnu
       - name: Build
         run: make
       - name: Release

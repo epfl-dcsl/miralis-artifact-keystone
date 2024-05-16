@@ -1,14 +1,16 @@
 all: opensbi.bin
 
-CROSS_COMPILE=riscv64-unknown-elf-
+CROSS_COMPILE = riscv64-linux-gnu-
+PATCHES = ../mirage_firmware.patch
 
 ifeq ($(shell uname -o), Darwin)
-	CROSS_COMPILE=riscv64-elf-
+	CROSS_COMPILE = riscv64-elf-
+	PATCHES += ../mirage_firmware_macos.patch
 endif
 
 opensbi:
 	git clone --depth 1 --branch v1.4 https://github.com/riscv-software-src/opensbi.git
-	cd opensbi && git apply ../mirage_firmware.patch
+	cd opensbi && git apply $(PATCHES)
 
 opensbi.bin: opensbi
 	make -C opensbi PLATFORM=generic FW_PAYLOAD=y FW_DYNAMIC=n FW_JUMP=n CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
