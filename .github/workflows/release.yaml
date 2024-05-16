@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        run: sudo apt-get update && sudo apt-get install gcc-riscv64-unknown-elf
+      - name: Build
+        run: make
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            opensbi.bin
+            opensbi.elf
