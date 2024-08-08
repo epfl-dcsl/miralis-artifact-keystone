@@ -4,7 +4,7 @@ LINUX = linux_shell linux_exit linux_driver
 
 all: opensbi.bin $(TARGETS_LINUX_BIN)
 
-CROSS_COMPILE = riscv64-unknown-linux-gnu-
+CROSS_COMPILE = riscv64-linux-gnu-
 PATCHES = ../mirage_firmware.patch
 INIT = shell
 DRIVER_PATH = ../driver
