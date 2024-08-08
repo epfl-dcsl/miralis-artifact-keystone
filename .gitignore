@@ -3,5 +3,6 @@ linux
 *.bin
 *.elf
 *.cpio.gz
+*.ko
 ramfs-riscv/dev/*
 ramfs-riscv/init

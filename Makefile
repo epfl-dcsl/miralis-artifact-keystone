@@ -1,8 +1,15 @@
-all: opensbi.bin opensbi-linux-kernel.bin
+TARGETS_LINUX_BIN = opensbi-linux-exit.bin opensbi-linux-shell.bin opensbi-linux-driver.bin
+INIT_RAMFS = initramfs_shell initramfs_exit initramfs_driver
+LINUX = linux_shell linux_exit linux_driver
 
-CROSS_COMPILE = riscv64-linux-gnu-
+all: opensbi.bin $(TARGETS_LINUX_BIN)
+
+CROSS_COMPILE = riscv64-unknown-linux-gnu-
 PATCHES = ../mirage_firmware.patch
 INIT = shell
+DRIVER_PATH = ../driver
+
+.PHONY: driver $(LINUX) $(TARGETS_LINUX_BIN) clean
 
 ifeq ($(shell uname -o), Darwin)
 	CROSS_COMPILE = riscv64-elf-
@@ -13,8 +20,7 @@ opensbi:
 	-git clone --depth 1 --branch v1.4 https://github.com/riscv-software-src/opensbi.git
 	cd opensbi && git apply $(PATCHES)
 
-.PHONY: initramfs
-initramfs:
+$(INIT_RAMFS):
 	sudo cp init_$(INIT) ramfs-riscv/init
 	sudo chmod +x ramfs-riscv/init
 	mkdir -p ramfs-riscv/dev 
@@ -25,8 +31,7 @@ initramfs:
 	cd ramfs-riscv; \
 	find . | cpio -o -H newc | gzip > ../initramfs_$(INIT).cpio.gz
 
-.PHONY: linux
-linux: initramfs
+$(LINUX):
 	-git clone --depth 1 --branch v6.10 https://github.com/torvalds/linux.git
 	make -C linux ARCH=riscv CROSS_COMPILE=$(CROSS_COMPILE) defconfig
 	make -C linux ARCH=riscv \
@@ -34,12 +39,24 @@ linux: initramfs
 		CONFIG_INITRAMFS_SOURCE=../initramfs_$(INIT).cpio.gz \
 		-j`nproc` 
 
-opensbi.bin: opensbi
-	make -C opensbi PLATFORM=generic FW_PAYLOAD=y FW_DYNAMIC=n FW_JUMP=n CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
-	cp opensbi/build/platform/generic/firmware/fw_payload.bin opensbi.bin
-	cp opensbi/build/platform/generic/firmware/fw_payload.elf opensbi.elf
+driver:
+	make -C linux M=$(DRIVER_PATH) modules ARCH=riscv CROSS_COMPILE=$(CROSS_COMPILE)
+	cp driver/driver.ko ramfs-riscv/driver.ko
+	make -C linux M=$(DRIVER_PATH) clean
 
-opensbi-linux-kernel.bin: opensbi linux
+opensbi-linux-driver.bin: INIT=driver
+opensbi-linux-driver.bin: driver linux_driver
+linux_driver: initramfs_driver
+
+opensbi-linux-exit.bin: INIT=exit
+opensbi-linux-exit.bin: linux_exit
+linux_exit: initramfs_exit
+
+opensbi-linux-shell.bin: INIT=shell
+opensbi-linux-shell.bin: linux_shell
+linux_shell: initramfs_shell
+
+$(TARGETS_LINUX_BIN): opensbi
 	make -C opensbi PLATFORM=generic \
 		O=build_$(INIT) \
 		FW_PAYLOAD=y \
@@ -52,6 +69,10 @@ opensbi-linux-kernel.bin: opensbi linux
 	cp opensbi/build_$(INIT)/platform/generic/firmware/fw_payload.bin opensbi-linux-kernel-$(INIT).bin
 	cp opensbi/build_$(INIT)/platform/generic/firmware/fw_payload.elf opensbi-linux-kernel-$(INIT).elf
 
-.PHONY: clean
+opensbi.bin: opensbi
+	make -C opensbi PLATFORM=generic FW_PAYLOAD=y FW_DYNAMIC=n FW_JUMP=n CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
+	cp opensbi/build/platform/generic/firmware/fw_payload.bin opensbi.bin
+	cp opensbi/build/platform/generic/firmware/fw_payload.elf opensbi.elf
+
 clean:
 	-rm -rf opensbi linux *.bin *.elf *.cpio.gz
