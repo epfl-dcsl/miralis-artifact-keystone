@@ -27,3 +27,5 @@ jobs:
             opensbi-linux-kernel-exit.elf
             opensbi-linux-kernel-shell.bin
             opensbi-linux-kernel-shell.elf
+            opensbi-linux-kernel-driver.bin
+            opensbi-linux-kernel-driver.elf
