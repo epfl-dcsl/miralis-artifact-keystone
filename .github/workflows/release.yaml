@@ -23,6 +23,8 @@ jobs:
           files: |
             opensbi.bin
             opensbi.elf
+            opensbi_jump.bin
+            opensbi_jump.elf
             opensbi-linux-kernel-exit.bin
             opensbi-linux-kernel-exit.elf
             opensbi-linux-kernel-shell.bin
