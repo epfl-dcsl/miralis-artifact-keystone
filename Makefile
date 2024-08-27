@@ -2,7 +2,7 @@ TARGETS_LINUX_BIN = opensbi-linux-exit.bin opensbi-linux-shell.bin opensbi-linux
 INIT_RAMFS = initramfs_shell initramfs_exit initramfs_driver
 LINUX = linux_shell linux_exit linux_driver
 
-all: opensbi.bin $(TARGETS_LINUX_BIN)
+all: opensbi.bin opensbi_jump.bin $(TARGETS_LINUX_BIN)
 
 CROSS_COMPILE = riscv64-linux-gnu-
 PATCHES = ../mirage_firmware.patch
@@ -74,5 +74,11 @@ opensbi.bin: opensbi
 	cp opensbi/build/platform/generic/firmware/fw_payload.bin opensbi.bin
 	cp opensbi/build/platform/generic/firmware/fw_payload.elf opensbi.elf
 
+opensbi_jump.bin: opensbi
+	make -C opensbi PLATFORM=generic FW_JUMP=y FW_JUMP_ADDR=0x80400000 CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
+	cp opensbi/build/platform/generic/firmware/fw_jump.bin opensbi_jump.bin
+	cp opensbi/build/platform/generic/firmware/fw_jump.elf opensbi_jump.elf
+
+.PHONY: clean
 clean:
 	-rm -rf opensbi linux *.bin *.elf *.cpio.gz
