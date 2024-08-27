@@ -9,7 +9,7 @@ PATCHES = ../mirage_firmware.patch
 INIT = shell
 DRIVER_PATH = ../driver
 
-.PHONY: driver $(LINUX) $(TARGETS_LINUX_BIN) clean
+.PHONY: opensbi.bin opensbi_jump.bin driver $(LINUX) $(TARGETS_LINUX_BIN) clean
 
 ifeq ($(shell uname -o), Darwin)
 	CROSS_COMPILE = riscv64-elf-
@@ -75,10 +75,9 @@ opensbi.bin: opensbi
 	cp opensbi/build/platform/generic/firmware/fw_payload.elf opensbi.elf
 
 opensbi_jump.bin: opensbi
-	make -C opensbi PLATFORM=generic FW_JUMP=y FW_JUMP_ADDR=0x80400000 CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
+	make -C opensbi PLATFORM=generic FW_JUMP=y FW_DYNAMIC=n FW_PAYLOAD=n FW_JUMP_ADDR=0x80400000 CROSS_COMPILE=$(CROSS_COMPILE) -j`nproc`
 	cp opensbi/build/platform/generic/firmware/fw_jump.bin opensbi_jump.bin
 	cp opensbi/build/platform/generic/firmware/fw_jump.elf opensbi_jump.elf
 
-.PHONY: clean
 clean:
 	-rm -rf opensbi linux *.bin *.elf *.cpio.gz
