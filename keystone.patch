@@ -1,0 +1,22 @@
+diff --git a/overlays/keystone/configs/linux64-defconfig b/overlays/keystone/configs/linux64-defconfig
+index f6e0086..1e7b853 100644
+--- a/overlays/keystone/configs/linux64-defconfig
++++ b/overlays/keystone/configs/linux64-defconfig
+@@ -125,3 +125,4 @@ CONFIG_DEBUG_PLIST=y
+ CONFIG_DEBUG_SG=y
+ # CONFIG_RCU_TRACE is not set
+ CONFIG_RCU_EQS_DEBUG=y
++CONFIG_CMDLINE="root=/dev/vda rw init=/bin/bash"
+diff --git a/overlays/keystone/configs/riscv64_generic_defconfig b/overlays/keystone/configs/riscv64_generic_defconfig
+index 89e02f3..d244574 100644
+--- a/overlays/keystone/configs/riscv64_generic_defconfig
++++ b/overlays/keystone/configs/riscv64_generic_defconfig
+@@ -9,7 +9,7 @@ BR2_CCACHE_INITIAL_SETUP="-M0 -F0"
+ BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_KEYSTONE_PATH)/patches"
+ BR2_PER_PACKAGE_DIRECTORIES=y
+ BR2_SSP_NONE=y
+-BR2_TARGET_GENERIC_ROOT_PASSWD="sifive"
++BR2_TARGET_GENERIC_ROOT_PASSWD=""
+ BR2_SYSTEM_BIN_SH_BASH=y
+ BR2_SYSTEM_DHCP="eth0"
+ BR2_ROOTFS_OVERLAY="/invalid"

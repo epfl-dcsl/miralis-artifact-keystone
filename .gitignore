@@ -4,5 +4,7 @@ linux
 *.elf
 *.cpio.gz
 *.ko
-ramfs-riscv/dev/*
-ramfs-riscv/init
+.vscode-ctags
+./keystone/*
+keystone.ext2
+keystone.img
