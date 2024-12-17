@@ -4,7 +4,8 @@ linux
 *.elf
 *.cpio.gz
 *.ko
+*.ext2
+Image_keystone
 .vscode-ctags
-./keystone/*
-keystone.ext2
-keystone.img
+keystone/*
+opensbi/*

@@ -1,0 +1,40 @@
+diff --git a/firmware/payloads/test_main.c b/firmware/payloads/test_main.c
+index 194dbbe6..4ef20dc 100644
+--- a/firmware/payloads/test_main.c
++++ b/firmware/payloads/test_main.c
+@@ -46,6 +46,13 @@ static inline void sbi_ecall_console_puts(const char *str)
+ 		  sbi_strlen(str), (unsigned long)str, 0, 0, 0, 0);
+ }
+ 
++static inline void sbi_ecall_system_reset()
++{
++    sbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_RESET,
++            SBI_SRST_RESET_TYPE_SHUTDOWN, SBI_SRST_RESET_REASON_NONE,
++            0, 0, 0, 0);
++}
++
+ #define wfi()                                             \
+ 	do {                                              \
+ 		__asm__ __volatile__("wfi" ::: "memory"); \
+@@ -54,6 +61,7 @@ static inline void sbi_ecall_console_puts(const char *str)
+ void test_main(unsigned long a0, unsigned long a1)
+ {
+ 	sbi_ecall_console_puts("\nTest payload running\n");
++    sbi_ecall_system_reset();
+ 
+ 	while (1)
+ 		wfi();
+diff --git a/platform/generic/objects.mk b/platform/generic/objects.mk
+index 136853e..e9c2a9d 100644
+--- a/platform/generic/objects.mk
++++ b/platform/generic/objects.mk
+@@ -22,7 +22,7 @@ platform-objs-y += platform.o
+ platform-objs-y += platform_override_modules.o
+ 
+ # Blobs to build
+-FW_TEXT_START=0x80000000
++FW_TEXT_START=0x80200000
+ FW_DYNAMIC=y
+ FW_JUMP=y
+ ifeq ($(PLATFORM_RISCV_XLEN), 32)
+ 
