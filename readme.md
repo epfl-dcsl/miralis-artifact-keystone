@@ -12,19 +12,28 @@ git push origin v0.1.0
 ```
 
 ## Artifacts
-TODO: Double check the content of keystone.img
 
-`keystone.img`: A linux kernel with the keystone driver. To install the driver, run `modprobe keystone-driver`.
+**Image_keystone**: A linux kernel with the keystone driver. To install the driver, run `modprobe keystone-driver`.
 
-`keystone.ext2`: A disk image that contains examples of enclave application in the `/usr/share/keystone/examples` directory.
+**keystone.ext2**: A disk image that contains examples of enclave application in the `/usr/share/keystone/examples` directory.
 
-For example, to run the `hello.ke` enclave on qemu, you can:
-1. Load `miralis` and `keystone.img` into qemu.
-2. Attach the `keystone.ext2` disk image to qemu.
+**opensbi-linux-keystone.**: An opensbi binary that will jump to the `Image_keystone` payload
 
-The above steps can be done by running 
+
+## Example
+Below is an example on how to run the `hello.ke` enclave on qemu.
+
+
 ```sh
-qemu-system-riscv64 --no-reboot -nographic -machine virt -bios /path/to/miralis.img -device loader,file=/path/to/keystone.img,addr=0x80200000,force-raw=on -smp 1 -drive file=path/to/keystone.ext2,format=raw,id=hd0 -device virtio-blk-device,drive=hd0 -device virtio-net-device
+# Load `miralis` and `opensbi-linux-keystone.bin` into qemu, and attach the `keystone.ext2` disk image.
+qemu-system-riscv64 --no-reboot -nographic -machine virt -bios /path/to/miralis.img -device loader,file=/path/to/opensbi-linux-keystone.bin,addr=0x80200000,force-raw=on -smp 1 -drive file=path/to/keystone.ext2,format=raw,id=hd0 -device virtio-blk-device,drive=hd0 -device virtio-net-device
+
+# At this point you should be inside the emulated kernel
+
+# Load the keystone driver
+modprobe keystone-driver
+
+# Run the enclave. A hello world message should appear
+/usr/share/keystone/examples/hello.ke
+
 ```
-3. Run `modprobe keystone-driver` to load the Keystone driver
-4. Run `/usr/share/keystone/examples/hello.ke` to run the enclave. A hello world message should appear.

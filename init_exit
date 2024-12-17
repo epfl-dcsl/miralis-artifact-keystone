@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cat <<!
-
-Hello from Linux!
-
-!
-
-poweroff -f
