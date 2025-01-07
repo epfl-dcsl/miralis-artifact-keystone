@@ -1,3 +1,45 @@
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 6806081..0b69129 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -32,6 +32,7 @@ add_custom_target("examples")
+ 
+ # add all examples below
+ add_subdirectory(hello)
++add_subdirectory(iozone)
+ add_subdirectory(hello-native)
+ add_subdirectory(attestation)
+ add_subdirectory(tests)
+diff --git a/examples/iozone/CMakeLists.txt b/examples/iozone/CMakeLists.txt
+new file mode 100644
+index 0000000..30bcd9d
+--- /dev/null
++++ b/examples/iozone/CMakeLists.txt
+@@ -0,0 +1,21 @@
++set(eapp_bin iozone)
++# Instead of compiling from a source, we directly specify the pre-compiled executable
++set(eapp_bin_path "eapp/iozone")  # Set the path to the precompiled executable
++set(package_name "iozone.ke")
++set(package_script "echo Run \"./iozone.ke --target .\" to extract package")
++
++# eapp
++# Here, instead of compiling from source, we're just copying the pre-compiled binary
++add_custom_target(${eapp_bin}
++  COMMAND cp ${eapp_bin_path} ${CMAKE_BINARY_DIR}/${eapp_bin}
++  COMMENT "Copying precompiled executable to build directory"
++)
++
++# add target for packaging (see keystone.cmake)
++add_keystone_package(${eapp_bin}-package
++  ${package_name}
++  ${package_script}
++  ${eapp_bin})
++
++# add package to the top-level target
++add_dependencies(examples ${eapp_bin}-package)
+diff --git a/examples/iozone/eapp/.placeholder b/examples/iozone/eapp/.placeholder
+new file mode 100644
+index 0000000..e69de29
 diff --git a/overlays/keystone/configs/linux64-defconfig b/overlays/keystone/configs/linux64-defconfig
 index f6e0086..1e7b853 100644
 --- a/overlays/keystone/configs/linux64-defconfig
