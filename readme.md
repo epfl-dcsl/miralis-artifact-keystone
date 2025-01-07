@@ -13,9 +13,11 @@ git push origin v0.1.0
 
 ## Artifacts
 
+**iozone**: A statically compiled binary of the iozone benchmark
+
 **Image_keystone**: A linux kernel with the keystone driver. To install the driver, run `modprobe keystone-driver`.
 
-**keystone.ext2**: A disk image that contains examples of enclave application in the `/usr/share/keystone/examples` directory.
+**keystone.ext2**: A disk image that contains examples of enclave application in the `/usr/share/keystone/examples` directory. It also contains the iozone binary
 
 **opensbi-linux-keystone.**: An opensbi binary that will jump to the `Image_keystone` payload
 

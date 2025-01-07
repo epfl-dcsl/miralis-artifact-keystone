@@ -19,6 +19,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
+            iozone
             Image_keystone
             keystone.ext2
             opensbi-linux-keystone.bin
