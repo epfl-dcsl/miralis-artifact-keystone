@@ -21,6 +21,6 @@ jobs:
           files: |
             iozone
             Image_keystone
-            keystone.ext2
+            keystone_ext2.img
             opensbi-linux-keystone.bin
             opensbi-linux-keystone.elf
