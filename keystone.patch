@@ -128,7 +128,7 @@ index 0000000..578c9e8
 +}
 +
 diff --git a/examples/tests/CMakeLists.txt b/examples/tests/CMakeLists.txt
-index 2112642..451af0c 100644
+index 2112642..e1c5b76 100644
 --- a/examples/tests/CMakeLists.txt
 +++ b/examples/tests/CMakeLists.txt
 @@ -1,6 +1,6 @@
@@ -139,6 +139,14 @@ index 2112642..451af0c 100644
  
  set(package_name "tests.ke")
  set(package_script "./run-test.sh")
+@@ -15,7 +15,6 @@ set(all_test_bins
+   test-malloc
+   test-long-nop
+   test-fibonacci
+-  test-fib-bench
+   test-attestation
+   test-untrusted
+   test-data-sealing)
 diff --git a/overlays/keystone/configs/linux64-defconfig b/overlays/keystone/configs/linux64-defconfig
 index f6e0086..1e7b853 100644
 --- a/overlays/keystone/configs/linux64-defconfig

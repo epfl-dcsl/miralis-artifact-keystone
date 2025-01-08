@@ -5,6 +5,7 @@ linux
 *.cpio.gz
 *.ko
 *.ext2
+*.img
 Image_keystone
 .vscode-ctags
 keystone/*
