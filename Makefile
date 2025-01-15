@@ -45,7 +45,7 @@ keystone:
 	&&  make
 
 	cp ./keystone/build-generic64/buildroot.build/images/Image Image_keystone
-	cp ./keystone/build-generic64/buildroot.build/images/rootfs.ext2 keystone_ext2.img
+	cp ./keystone/build-generic64/buildroot.build/images/rootfs.ext2 keystone.ext2
 
 # Build OpenSBI with the linux+keystone payload
 opensbi:

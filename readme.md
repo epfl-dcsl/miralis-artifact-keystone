@@ -17,7 +17,7 @@ git push origin v0.1.0
 
 **Image_keystone**: A linux kernel with the keystone driver. To install the driver, run `modprobe keystone-driver`.
 
-**keystone_ext2.img**: A disk image that contains examples of enclave application in the `/usr/share/keystone/examples` directory. It also contains the iozone binary
+**keystone.ext2**: An ext2 filesystem that contains examples of enclave application in the `/usr/share/keystone/examples` directory. It also contains the iozone binary
 
 **opensbi-linux-keystone.**: An opensbi binary that will jump to the `Image_keystone` payload
 
@@ -27,8 +27,8 @@ Below is an example on how to run the `hello.ke` enclave on qemu.
 
 
 ```sh
-# Load `miralis` and `opensbi-linux-keystone.bin` into qemu, and attach the `keystone_ext2.img` disk image.
-qemu-system-riscv64 --no-reboot -nographic -machine virt -bios /path/to/miralis.img -device loader,file=/path/to/opensbi-linux-keystone.bin,addr=0x80200000,force-raw=on -smp 1 -drive file=path/to/keystone_ext2.img,format=raw,id=hd0 -device virtio-blk-device,drive=hd0 -device virtio-net-device
+# Load `miralis` and `opensbi-linux-keystone.bin` into qemu, and attach the `keystone.ext2` disk image.
+qemu-system-riscv64 --no-reboot -nographic -machine virt -bios /path/to/miralis.img -device loader,file=/path/to/opensbi-linux-keystone.bin,addr=0x80200000,force-raw=on -smp 1 -drive file=path/to/keystone.ext2,format=raw,id=hd0 -device virtio-blk-device,drive=hd0 -device virtio-net-device
 
 # At this point you should be inside the emulated kernel
 
