@@ -20,6 +20,7 @@ install:
 musl:
 	-git clone https://github.com/richfelker/musl-cross-make
 	cd musl-cross-make \
+	&& git checkout 82d6c2a6832a4c2affa1e6bde1591015175b9171 \
 	&& TARGET=riscv64-linux-musl make \
 	&& TARGET=riscv64-linux-musl make install
 
