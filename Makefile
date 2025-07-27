@@ -1,4 +1,4 @@
-KEYSTONE_PATCHES = ../keystone.patch
+KEYSTONE_PATCHES = ../keystone-rv8.patch
 OPENSBI_PATCHES = ../opensbi.patch
 CROSS_COMPILE = riscv64-linux-gnu- 
 
@@ -9,7 +9,7 @@ ifeq ($(shell uname -o), Darwin)
 	OPENSBI_PATCHES += ../opensbi_macos.patch
 endif
 
-all: install musl iozone keystone opensbi
+all: install musl rv8 iozone keystone opensbi
 
 # Install all necessary tools
 install:
@@ -29,8 +29,9 @@ rv8:
 	cd rv8-bench \
 	&& git checkout 935c8ff633bafc1a3df8f8c6a5af47c3da816e2a \
 	&& make -j `nproc`
-	ls bin
-	ls bin/riscv64
+	ls rv8-bench/bin
+	ls rv8-bench/bin/riscv64
+	cp rv8-bench/bin/riscv64/* .
 
 # Compile iozone with musl
 iozone:
@@ -51,6 +52,7 @@ keystone:
 	&& ./fast-setup.sh \
 	&& git apply $(KEYSTONE_PATCHES) \
 	&& cp ../iozone examples/iozone/eapp \
+	&& cp ../dhrystone examples/dhrystone/eapp \
 	&& make -j`nproc`
 
 	cp ./keystone/build-generic64/buildroot.build/images/Image Image_keystone

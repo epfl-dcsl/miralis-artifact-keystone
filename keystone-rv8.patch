@@ -1,0 +1,295 @@
+commit 6dd6d7dedbee9b2e38ee6bcfd6032101580ef35e
+Author: CharlyCst <charly.castes@epfl.ch>
+Date:   Sun Jul 27 19:26:01 2025 +0200
+
+    Add dhrystone from rv8
+
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 6806081..27248f5 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -32,6 +32,8 @@ add_custom_target("examples")
+ 
+ # add all examples below
+ add_subdirectory(hello)
++add_subdirectory(iozone)
++add_subdirectory(dhrystone)
+ add_subdirectory(hello-native)
+ add_subdirectory(attestation)
+ add_subdirectory(tests)
+diff --git a/examples/dhrystone/CMakeLists.txt b/examples/dhrystone/CMakeLists.txt
+new file mode 100644
+index 0000000..241b0f0
+--- /dev/null
++++ b/examples/dhrystone/CMakeLists.txt
+@@ -0,0 +1,35 @@
++set(eapp_bin dhrystone)
++set(eapp_bin_path "eapp/dhrystone")
++set(host_bin dhrystone-runner)
++set(host_src host/host.cpp)
++set(package_name "dhrystone.ke")
++set(package_script "./dhrystone-runner dhrystone eyrie-rt loader.bin")
++set(eyrie_plugins "io_syscall linux_syscall env_setup")
++
++# eapp
++# Here, instead of compiling from source, we're just copying the pre-compiled binary
++add_custom_target(${eapp_bin}
++  COMMAND cp ${eapp_bin_path} ${CMAKE_BINARY_DIR}/${eapp_bin}
++  COMMENT "Copying precompiled executable to build directory"
++)
++
++# host
++add_executable(${host_bin} ${host_src})
++target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
++
++# eyrie
++set(eyrie_files_to_copy .options_log eyrie-rt loader.bin)
++add_eyrie_runtime(${eapp_bin}-eyrie
++  ${eyrie_plugins}
++  ${eyrie_files_to_copy})
++
++# add target for packaging (see keystone.cmake)
++add_keystone_package(${eapp_bin}-package
++  ${package_name}
++  ${package_script}
++  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
++
++add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
++
++# add package to the top-level target
++add_dependencies(examples ${eapp_bin}-package)
+diff --git a/examples/dhrystone/eapp/.placeholder b/examples/dhrystone/eapp/.placeholder
+new file mode 100644
+index 0000000..e69de29
+diff --git a/examples/dhrystone/host/host.cpp b/examples/dhrystone/host/host.cpp
+new file mode 100644
+index 0000000..578c9e8
+--- /dev/null
++++ b/examples/dhrystone/host/host.cpp
+@@ -0,0 +1,67 @@
++//******************************************************************************
++// Copyright (c) 2018, The Regents of the University of California (Regents).
++// All Rights Reserved. See LICENSE for license details.
++//------------------------------------------------------------------------------
++#include <getopt.h>
++#include <cstdio>
++#include <iostream>
++#include "edge/edge_call.h"
++#include "host/keystone.h"
++
++using namespace Keystone;
++
++int main(int argc, char** argv) {
++  if (argc < 4 || argc > 8) {
++    printf(
++        "Usage: %s <eapp> <runtime> <loader.bin> [--utm-size SIZE(K)] [--freemem-size "
++        "SIZE(K)]\n",
++        argv[0]);
++    return 0;
++  }
++
++  char* eapp_file = argv[1];
++  char* rt_file   = argv[2];
++  char* ld_file   = argv[3];
++
++  size_t untrusted_size = 2 * 1024 * 1024;
++  size_t freemem_size   = 48 * 1024 * 1024;
++
++  static struct option long_options[] = {
++      {"utm-size", required_argument, 0, 'u'},
++      {"freemem-size", required_argument, 0, 'f'},
++      {0, 0, 0, 0}};
++
++
++  int c;
++  int opt_index = 3;
++  while (1) {
++    c = getopt_long(argc, argv, "u:f:", long_options, &opt_index);
++    if (c == -1) break;
++
++    switch (c) {
++      case 0:
++        break;
++      case 'u':
++        untrusted_size = atoi(optarg) * 1024;
++        break;
++      case 'f':
++        freemem_size = atoi(optarg) * 1024;
++        break;
++    }
++  }
++
++  Keystone::Enclave enclave;
++  Keystone::Params params;
++
++  params.setFreeMemSize(freemem_size);
++  params.setUntrustedSize(untrusted_size);
++  enclave.init(eapp_file, rt_file, ld_file, params);
++  enclave.registerOcallDispatch(incoming_call_dispatch);
++  edge_call_init_internals(
++      (uintptr_t)enclave.getSharedBuffer(), enclave.getSharedBufferSize());
++
++  uintptr_t encl_ret;
++  enclave.run(&encl_ret);
++  return 0;
++}
++
+diff --git a/examples/iozone/CMakeLists.txt b/examples/iozone/CMakeLists.txt
+new file mode 100644
+index 0000000..0e1b20a
+--- /dev/null
++++ b/examples/iozone/CMakeLists.txt
+@@ -0,0 +1,35 @@
++set(eapp_bin iozone)
++set(eapp_bin_path "eapp/iozone")
++set(host_bin iozone-runner)
++set(host_src host/host.cpp)
++set(package_name "iozone.ke")
++set(package_script "./iozone-runner iozone eyrie-rt loader.bin")
++set(eyrie_plugins "io_syscall linux_syscall env_setup")
++
++# eapp
++# Here, instead of compiling from source, we're just copying the pre-compiled binary
++add_custom_target(${eapp_bin}
++  COMMAND cp ${eapp_bin_path} ${CMAKE_BINARY_DIR}/${eapp_bin}
++  COMMENT "Copying precompiled executable to build directory"
++)
++
++# host
++add_executable(${host_bin} ${host_src})
++target_link_libraries(${host_bin} ${KEYSTONE_LIB_HOST} ${KEYSTONE_LIB_EDGE})
++
++# eyrie
++set(eyrie_files_to_copy .options_log eyrie-rt loader.bin)
++add_eyrie_runtime(${eapp_bin}-eyrie
++  ${eyrie_plugins}
++  ${eyrie_files_to_copy})
++
++# add target for packaging (see keystone.cmake)
++add_keystone_package(${eapp_bin}-package
++  ${package_name}
++  ${package_script}
++  ${eyrie_files_to_copy} ${eapp_bin} ${host_bin})
++
++add_dependencies(${eapp_bin}-package ${eapp_bin}-eyrie)
++
++# add package to the top-level target
++add_dependencies(examples ${eapp_bin}-package)
+diff --git a/examples/iozone/eapp/.placeholder b/examples/iozone/eapp/.placeholder
+new file mode 100644
+index 0000000..e69de29
+diff --git a/examples/iozone/host/host.cpp b/examples/iozone/host/host.cpp
+new file mode 100644
+index 0000000..578c9e8
+--- /dev/null
++++ b/examples/iozone/host/host.cpp
+@@ -0,0 +1,67 @@
++//******************************************************************************
++// Copyright (c) 2018, The Regents of the University of California (Regents).
++// All Rights Reserved. See LICENSE for license details.
++//------------------------------------------------------------------------------
++#include <getopt.h>
++#include <cstdio>
++#include <iostream>
++#include "edge/edge_call.h"
++#include "host/keystone.h"
++
++using namespace Keystone;
++
++int main(int argc, char** argv) {
++  if (argc < 4 || argc > 8) {
++    printf(
++        "Usage: %s <eapp> <runtime> <loader.bin> [--utm-size SIZE(K)] [--freemem-size "
++        "SIZE(K)]\n",
++        argv[0]);
++    return 0;
++  }
++
++  char* eapp_file = argv[1];
++  char* rt_file   = argv[2];
++  char* ld_file   = argv[3];
++
++  size_t untrusted_size = 2 * 1024 * 1024;
++  size_t freemem_size   = 48 * 1024 * 1024;
++
++  static struct option long_options[] = {
++      {"utm-size", required_argument, 0, 'u'},
++      {"freemem-size", required_argument, 0, 'f'},
++      {0, 0, 0, 0}};
++
++
++  int c;
++  int opt_index = 3;
++  while (1) {
++    c = getopt_long(argc, argv, "u:f:", long_options, &opt_index);
++    if (c == -1) break;
++
++    switch (c) {
++      case 0:
++        break;
++      case 'u':
++        untrusted_size = atoi(optarg) * 1024;
++        break;
++      case 'f':
++        freemem_size = atoi(optarg) * 1024;
++        break;
++    }
++  }
++
++  Keystone::Enclave enclave;
++  Keystone::Params params;
++
++  params.setFreeMemSize(freemem_size);
++  params.setUntrustedSize(untrusted_size);
++  enclave.init(eapp_file, rt_file, ld_file, params);
++  enclave.registerOcallDispatch(incoming_call_dispatch);
++  edge_call_init_internals(
++      (uintptr_t)enclave.getSharedBuffer(), enclave.getSharedBufferSize());
++
++  uintptr_t encl_ret;
++  enclave.run(&encl_ret);
++  return 0;
++}
++
+diff --git a/examples/tests/CMakeLists.txt b/examples/tests/CMakeLists.txt
+index 2112642..e1c5b76 100644
+--- a/examples/tests/CMakeLists.txt
++++ b/examples/tests/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ set(host_bin test-runner)
+ set(host_src test-runner.cpp edge_wrapper.cpp)
+-set(eyrie_plugins "none")
++set(eyrie_plugins "io_syscall linux_syscall env_setup")
+ 
+ set(package_name "tests.ke")
+ set(package_script "./run-test.sh")
+@@ -15,7 +15,6 @@ set(all_test_bins
+   test-malloc
+   test-long-nop
+   test-fibonacci
+-  test-fib-bench
+   test-attestation
+   test-untrusted
+   test-data-sealing)
+diff --git a/overlays/keystone/configs/linux64-defconfig b/overlays/keystone/configs/linux64-defconfig
+index f6e0086..1e7b853 100644
+--- a/overlays/keystone/configs/linux64-defconfig
++++ b/overlays/keystone/configs/linux64-defconfig
+@@ -125,3 +125,4 @@ CONFIG_DEBUG_PLIST=y
+ CONFIG_DEBUG_SG=y
+ # CONFIG_RCU_TRACE is not set
+ CONFIG_RCU_EQS_DEBUG=y
++CONFIG_CMDLINE="root=/dev/vda rw init=/bin/bash"
+diff --git a/overlays/keystone/configs/riscv64_generic_defconfig b/overlays/keystone/configs/riscv64_generic_defconfig
+index 89e02f3..d244574 100644
+--- a/overlays/keystone/configs/riscv64_generic_defconfig
++++ b/overlays/keystone/configs/riscv64_generic_defconfig
+@@ -9,7 +9,7 @@ BR2_CCACHE_INITIAL_SETUP="-M0 -F0"
+ BR2_GLOBAL_PATCH_DIR="$(BR2_EXTERNAL_KEYSTONE_PATH)/patches"
+ BR2_PER_PACKAGE_DIRECTORIES=y
+ BR2_SSP_NONE=y
+-BR2_TARGET_GENERIC_ROOT_PASSWD="sifive"
++BR2_TARGET_GENERIC_ROOT_PASSWD=""
+ BR2_SYSTEM_BIN_SH_BASH=y
+ BR2_SYSTEM_DHCP="eth0"
+ BR2_ROOTFS_OVERLAY="/invalid"
