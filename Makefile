@@ -28,7 +28,8 @@ rv8:
 	-git clone https://github.com/keystone-enclave/rv8-bench.git
 	cd rv8-bench \
 	&& git checkout 935c8ff633bafc1a3df8f8c6a5af47c3da816e2a \
-	&& make -j `nproc`
+	&& echo "$(shell pwd)/musl-cross-make/output/bin/" \
+	&& PATH=$(shell pwd)/musl-cross-make/output/bin/:$$PATH make -j `nproc`
 	ls rv8-bench/bin
 	ls rv8-bench/bin/riscv64
 	cp rv8-bench/bin/riscv64/* .
