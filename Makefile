@@ -53,7 +53,7 @@ keystone:
 	&& ./fast-setup.sh \
 	&& git apply $(KEYSTONE_PATCHES) \
 	&& cp ../iozone examples/iozone/eapp \
-	&& cp ../dhrystone examples/dhrystone/eapp \
+	&& cp ../dhrystone.O3 examples/dhrystone/eapp/dhrystone \
 	&& make -j`nproc`
 
 	cp ./keystone/build-generic64/buildroot.build/images/Image Image_keystone
