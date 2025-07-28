@@ -53,7 +53,14 @@ keystone:
 	&& ./fast-setup.sh \
 	&& git apply $(KEYSTONE_PATCHES) \
 	&& cp ../iozone examples/iozone/eapp \
+	&& cp ../aes.O3 examples/aes/eapp/aes \
+	&& cp ../bigint.O3 examples/bigint/eapp/bigint \
 	&& cp ../dhrystone.O3 examples/dhrystone/eapp/dhrystone \
+	&& cp ../miniz.O3 examples/miniz/eapp/miniz \
+	&& cp ../norx.O3 examples/norx/eapp/norx \
+	&& cp ../primes.O3 examples/primes/eapp/primes \
+	&& cp ../qsort.O3 examples/qsort/eapp/qsort \
+	&& cp ../sha512.O3 examples/sha512/eapp/sha512 \
 	&& make -j`nproc`
 
 	cp ./keystone/build-generic64/buildroot.build/images/Image Image_keystone
